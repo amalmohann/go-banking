@@ -4,26 +4,26 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/amalmohann/banking/service"
+	"github.com/gorilla/mux"
 )
 
+//handler service
 type CustomerHandlers struct {
 	service service.CustomerService
 }
 
+// health check handler
 func healthCheck(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "ok")
 }
 
+// Find all customers handler
 func (ch *CustomerHandlers) getAllCustomers(w http.ResponseWriter, r *http.Request) {
 	customers, _ := ch.service.GetAllCustomers()
-
-	// []domain.Customer{
-	// 	{Id: "1001", Name: "Amal Mohan N", City: "Kozhikode", Zip: "673611", DateOfBirth: "1996-07-27", Status: "1"},
-	// 	{Id: "1002", Name: "Amrutha TP", City: "Kozhikode", Zip: "673611", DateOfBirth: "1997-10-30", Status: "1"},
-	// }
 	if r.Header.Get("Content-Type") == "application/json" {
 		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(customers)
@@ -33,14 +33,19 @@ func (ch *CustomerHandlers) getAllCustomers(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// func createCustomer(w http.ResponseWriter, r *http.Request) {
-// 	// w.Header().Add("Content-Type", "application/json")
-// 	// json.NewEncoder(w).Encode(vars)
-// 	fmt.Fprintf(w, "Post method")
-// }
-
-// func getCustomer(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	fmt.Fprintf(w, "%s\n", vars["customer_id"])
-
-// }
+// find customer by id handler
+func (ch *CustomerHandlers) getCustomerById(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	p := r.URL.Query()
+	log.Print("back: ", p)
+	log.Print(params)
+	id := params["customer_id"]
+	customer, _ := ch.service.GetCustomerById(id)
+	if customer == nil {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "Customer Not Found")
+	} else {
+		w.Header().Add("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(customer)
+	}
+}

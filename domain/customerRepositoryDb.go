@@ -8,14 +8,18 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// repository
 type CustomerRepositoryDb struct {
 	dbClient *sql.DB
 }
 
-func (db CustomerRepositoryDb) FindAllCustomers() ([]Customer, error) {
+// implementing the interfaces
+
+// FindAll()
+func (db CustomerRepositoryDb) FindAll() ([]Customer, error) {
 	customers := make([]Customer, 0)
-	findAllQuery := "SELECT * FROM customers"
-	row, err := db.dbClient.Query(findAllQuery)
+	query := "SELECT * FROM customers"
+	row, err := db.dbClient.Query(query)
 	if err != nil {
 		log.Print("Error Fetching from database: ", err.Error())
 		return nil, err
@@ -32,6 +36,20 @@ func (db CustomerRepositoryDb) FindAllCustomers() ([]Customer, error) {
 	return customers, nil
 }
 
+// FindById()
+func (db CustomerRepositoryDb) ById(id string) (*Customer, error) {
+	var c Customer
+	query := "SELECT * FROM customers WHERE customer_id = ?"
+	row := db.dbClient.QueryRow(query, id)
+	err := row.Scan(&c.Id, &c.Name, &c.DateOfBirth, &c.City, &c.Zip, &c.Status)
+	if err != nil {
+		log.Print("Error while scanning the customer: ", err.Error())
+		return nil, err
+	}
+	return &c, nil
+}
+
+// Helper Function to create new Db connection
 func NewCustomerRepositoryDb() CustomerRepositoryDb {
 	dbClient, err := sql.Open("mysql", "root:root@tcp(localhost:3306)/banking")
 	if err != nil {
