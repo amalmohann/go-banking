@@ -1,11 +1,14 @@
 package service
 
-import "github.com/amalmohann/banking/domain"
+import (
+	"github.com/amalmohann/banking/domain"
+	"github.com/amalmohann/banking/errs"
+)
 
 //services
 type CustomerService interface {
 	GetAllCustomers() ([]domain.Customer, error)
-	GetCustomerById(string) (*domain.Customer, error)
+	GetCustomerById(string) (*domain.Customer, *errs.AppError)
 }
 
 // default repository
@@ -19,7 +22,7 @@ func (s DefaultCustomerService) GetAllCustomers() ([]domain.Customer, error) {
 }
 
 // get customers by id
-func (s DefaultCustomerService) GetCustomerById(id string) (*domain.Customer, error) {
+func (s DefaultCustomerService) GetCustomerById(id string) (*domain.Customer, *errs.AppError) {
 	return s.repo.ById(id)
 }
 
