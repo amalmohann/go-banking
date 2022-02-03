@@ -3,7 +3,6 @@ package domain
 import (
 	"database/sql"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/amalmohann/banking/errs"
@@ -18,17 +17,12 @@ type CustomerRepositoryDb struct {
 // implementing the interfaces
 
 // FindAll()
-func (db CustomerRepositoryDb) FindAll(params ...string) ([]Customer, *errs.AppError) {
+func (db CustomerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppError) {
 	customers := make([]Customer, 0)
 	query := "SELECT * FROM customers"
-	status := map[string]int{
-		"inactive": 0,
-		"active":   1,
+	if status == "1" || status == "0" {
+		query = query + " where status = " + status
 	}
-	if len(params) >= 1 && params[0] != "" {
-		query = query + " where status = " + strconv.Itoa(status[params[0]])
-	}
-	println(query)
 	row, err := db.dbClient.Query(query)
 	if err != nil {
 		log.Print("Error Fetching from database: ", err.Error())
