@@ -17,20 +17,20 @@ type CustomerRepositoryDb struct {
 // implementing the interfaces
 
 // FindAll()
-func (db CustomerRepositoryDb) FindAll() ([]Customer, error) {
+func (db CustomerRepositoryDb) FindAll() ([]Customer, *errs.AppError) {
 	customers := make([]Customer, 0)
 	query := "SELECT * FROM customers"
 	row, err := db.dbClient.Query(query)
 	if err != nil {
 		log.Print("Error Fetching from database: ", err.Error())
-		return nil, err
+		return nil, errs.InternalServerError("Error Fetching from database: " + err.Error())
 	}
 	for row.Next() {
 		var c Customer
 		err := row.Scan(&c.Id, &c.Name, &c.DateOfBirth, &c.City, &c.Zip, &c.Status)
 		if err != nil {
 			log.Print("Error scanning Customer list from database: ", err.Error())
-			return nil, err
+			return nil, errs.InternalServerError("Error Fetching from database: " + err.Error())
 		}
 		customers = append(customers, c)
 	}
