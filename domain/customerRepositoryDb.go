@@ -45,7 +45,7 @@ func (db CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 	err := row.Scan(&c.Id, &c.Name, &c.DateOfBirth, &c.City, &c.Zip, &c.Status)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errs.NotFoundError("Customer Not Found! ")
+			return nil, errs.NotFoundError("Customer Not Found!")
 		} else {
 			return nil, errs.InternalServerError("Unexpected database error: " + err.Error())
 		}

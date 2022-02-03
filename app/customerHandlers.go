@@ -37,10 +37,14 @@ func (ch *CustomerHandlers) getCustomerById(w http.ResponseWriter, r *http.Reque
 	id := p["customer_id"]
 	customer, err := ch.service.GetCustomerById(id)
 	if err != nil {
-		w.WriteHeader(err.Status)
-		fmt.Fprintf(w, err.Message)
+		writeResponse(w, err.Status, err.ToResponse())
 	} else {
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(customer)
+		writeResponse(w, http.StatusOK, customer)
 	}
+}
+
+func writeResponse(w http.ResponseWriter, status int, data interface{}) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(data)
 }
