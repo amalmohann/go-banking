@@ -2,10 +2,10 @@ package domain
 
 import (
 	"database/sql"
-	"log"
 	"time"
 
 	"github.com/amalmohann/banking/errs"
+	"github.com/amalmohann/banking/logger"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -25,14 +25,14 @@ func (db CustomerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppErro
 	}
 	row, err := db.dbClient.Query(query)
 	if err != nil {
-		log.Print("Error Fetching from database: ", err.Error())
+		logger.Error("Error Fetching from database: " + err.Error())
 		return nil, errs.InternalServerError("Error Fetching from database: " + err.Error())
 	}
 	for row.Next() {
 		var c Customer
 		err := row.Scan(&c.Id, &c.Name, &c.DateOfBirth, &c.City, &c.Zip, &c.Status)
 		if err != nil {
-			log.Print("Error scanning Customer list from database: ", err.Error())
+			logger.Error("Error scanning Customer list from database: " + err.Error())
 			return nil, errs.InternalServerError("Error Fetching from database: " + err.Error())
 		}
 		customers = append(customers, c)
@@ -48,8 +48,10 @@ func (db CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 	err := row.Scan(&c.Id, &c.Name, &c.DateOfBirth, &c.City, &c.Zip, &c.Status)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			logger.Error("Error Fetching from database: " + err.Error())
 			return nil, errs.NotFoundError("Customer Not Found!")
 		} else {
+			logger.Error("Error Fetching from database: " + err.Error())
 			return nil, errs.InternalServerError("Unexpected database error: " + err.Error())
 		}
 	}
