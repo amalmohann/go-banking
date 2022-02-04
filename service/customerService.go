@@ -8,7 +8,7 @@ import (
 
 //services
 type CustomerService interface {
-	GetAllCustomers(string) ([]domain.Customer, *errs.AppError)
+	GetAllCustomers(string) ([]dto.CustomerResponse, *errs.AppError)
 	GetCustomerById(string) (*dto.CustomerResponse, *errs.AppError)
 }
 
@@ -17,20 +17,29 @@ type DefaultCustomerService struct {
 	repo domain.CustomerRepository
 }
 
+//functions
+func toStatusCode(status string) string {
+	statusCode := ""
+	if status == "active" {
+		statusCode = "1"
+	} else if status == "inactive" {
+		statusCode = "0"
+	}
+	return statusCode
+}
+
 // get all customers
-func (s DefaultCustomerService) GetAllCustomers(status string) ([]domain.Customer, *errs.AppError) {
-
-	statusCodes := map[string]string{
-		"inactive": "0",
-		"active":   "1",
+func (s DefaultCustomerService) GetAllCustomers(status string) ([]dto.CustomerResponse, *errs.AppError) {
+	var response []dto.CustomerResponse
+	statusCode := toStatusCode(status)
+	c, err := s.repo.FindAll(statusCode)
+	if err != nil {
+		return nil, err
 	}
-
-	if status == "active" || status == "inactive" {
-		status = statusCodes[status]
-	} else {
-		status = ""
+	for _, c := range c {
+		response = append(response, c.ToResponse())
 	}
-	return s.repo.FindAll(status)
+	return response, nil
 }
 
 // get customers by id
