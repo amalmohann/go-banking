@@ -2,13 +2,14 @@ package service
 
 import (
 	"github.com/amalmohann/banking/domain"
+	"github.com/amalmohann/banking/dto"
 	"github.com/amalmohann/banking/errs"
 )
 
 //services
 type CustomerService interface {
 	GetAllCustomers(string) ([]domain.Customer, *errs.AppError)
-	GetCustomerById(string) (*domain.Customer, *errs.AppError)
+	GetCustomerById(string) (*dto.CustomerResponse, *errs.AppError)
 }
 
 // default repository
@@ -33,8 +34,13 @@ func (s DefaultCustomerService) GetAllCustomers(status string) ([]domain.Custome
 }
 
 // get customers by id
-func (s DefaultCustomerService) GetCustomerById(id string) (*domain.Customer, *errs.AppError) {
-	return s.repo.ById(id)
+func (s DefaultCustomerService) GetCustomerById(id string) (*dto.CustomerResponse, *errs.AppError) {
+	c, err := s.repo.ById(id)
+	if err != nil {
+		return nil, err
+	}
+	response := c.ToResponse()
+	return &response, nil
 }
 
 // helper function to connect to default service
