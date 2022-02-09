@@ -2,7 +2,6 @@ package domain
 
 import (
 	"database/sql"
-	"time"
 
 	"github.com/amalmohann/banking/errs"
 	"github.com/amalmohann/banking/logger"
@@ -50,15 +49,6 @@ func (db CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 }
 
 // Helper Function to create new Db connection
-func NewCustomerRepositoryDb() CustomerRepositoryDb {
-	dbClient, err := sqlx.Open("mysql", "root:root@tcp(localhost:3306)/banking")
-	if err != nil {
-		panic(err)
-	}
-	// See "Important settings" section.
-	dbClient.SetConnMaxLifetime(time.Minute * 3)
-	dbClient.SetMaxOpenConns(10)
-	dbClient.SetMaxIdleConns(10)
-
+func NewCustomerRepositoryDb(dbClient *sqlx.DB) CustomerRepositoryDb {
 	return CustomerRepositoryDb{client: dbClient}
 }
